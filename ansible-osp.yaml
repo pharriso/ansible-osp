@@ -38,7 +38,7 @@
   - name: Create key
     os_keypair:
       name: mykeypair
-      public_key_file: /tmp/id_rsa.pub
+      public_key: "{{ public_key }}"
 
   - name: Launch cirros instance
     os_server:
