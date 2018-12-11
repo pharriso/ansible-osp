@@ -1,0 +1,11 @@
+---
+
+- hosts: all
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Create Project
+    os_project:
+      state: present
+      name: "{{ osp_project }}"
+
