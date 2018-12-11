@@ -13,4 +13,5 @@
         project_name: "{{ osp_project_name }}"
       state: present
       name: "{{ osp_project }}"
+      domain_id: "{{ osp_domain }}"
 
