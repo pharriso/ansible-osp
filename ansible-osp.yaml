@@ -10,7 +10,7 @@
       state: present
 
   - name: Create internal subnet
-    os_subnet:"{{ internal_network }}-internal"
+    os_subnet: "{{ internal_network }}-internal"
       state: present
       network_name: 
       name: "{{ internal_network }}-internal-subnet"
@@ -20,7 +20,7 @@
     os_router:
       name: "{{ internal_network }}-router"
       state: present
-      network: "{{ external_networ }}"
+      network: "{{ external_network }}"
       interfaces:
         - "{{ internal_network }}-internal-subnet"
 
@@ -54,4 +54,4 @@
   - name: Create floating ip
     os_floating_ip:
       server: "{{ vm_name }}"
-      network: external
+      network: "{{ external_network }}"
