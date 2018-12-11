@@ -1,0 +1,12 @@
+---
+
+- hosts: all
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Create Project
+    os_project:
+      name: myproject
+      state: present
+      domain_id: default
+
