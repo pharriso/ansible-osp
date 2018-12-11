@@ -9,4 +9,5 @@
       state: present
       name: "{{ osp_project }}"
       domain_id: "{{ osp_domain }}"
+    delegate_to: "{{ shade_server }}"
 
