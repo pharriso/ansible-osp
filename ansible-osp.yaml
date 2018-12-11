@@ -9,7 +9,7 @@
       auth:
         auth_url: "{{ auth_url }}"
         password: "{{ password }}"
-        project: "{{ project_name }}"
+        project_name: "{{ project }}"
         username: "{{ username }}"
       state: present
       name: "{{ osp_project }}"
