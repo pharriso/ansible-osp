@@ -7,5 +7,5 @@
   - name: Create Project
     os_project:
       state: present
-      name: "{{ osp_project }}"
-      domain_id: "{{ osp_domain }}"
+      name: testing
+      domain_id: default
