@@ -5,7 +5,7 @@
   gather_facts: false
   tasks:
   - name: Create Project
-    os_network:
+    os_project:
       state: present
-      name: testing
       name: test
+      domain_id: default
