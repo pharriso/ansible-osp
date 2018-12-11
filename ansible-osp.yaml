@@ -4,9 +4,54 @@
   connection: local
   gather_facts: false
   tasks:
-  - name: Create Project
-    os_project:
+  - name: Create internal network
+    os_network:
+      name: "{{ internal_network }}-internal"
       state: present
-      name: test
-      domain_id: default
-      endpoint_type: admin
+
+  - name: Create internal subnet
+    os_subnet:"{{ internal_network }}-internal"
+      state: present
+      network_name: 
+      name: "{{ internal_network }}-internal-subnet"
+      cidr: "{{ internal_cidr }}"
+
+  - name: Create router
+    os_router:
+      name: "{{ internal_network }}-router"
+      state: present
+      network: "{{ external_networ }}"
+      interfaces:
+        - "{{ internal_network }}-internal-subnet"
+
+  - name: Create SSH security group
+    os_security_group:
+      name: ssh
+
+  - name: Add SSH to security ssh security group
+    os_security_group_rule:
+      security_group: ssh
+      protocol: tcp
+      port_range_min: 22
+      port_range_max: 22
+
+  - name: Create key
+    os_keypair:
+      name: mykeypair
+      public_key_file: /root/.ssh/id_rsa.pub
+
+  - name: Launch cirros instance
+    os_server:
+      state: present
+      name: "{{ vm_name }}"
+      image: cirros
+      flavor: m1.tiny
+      nics:
+        - net-name: "{{ internal_network }}-internal"
+      key_name: test-key
+      security_groups: default,ssh
+
+  - name: Create floating ip
+    os_floating_ip:
+      server: "{{ vm_name }}"
+      network: external
