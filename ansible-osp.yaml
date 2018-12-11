@@ -10,9 +10,9 @@
       state: present
 
   - name: Create internal subnet
-    os_subnet: "{{ internal_network }}-internal"
+    os_subnet: 
       state: present
-      network_name: 
+      network_name: "{{ internal_network }}-internal"
       name: "{{ internal_network }}-internal-subnet"
       cidr: "{{ internal_cidr }}"
 
