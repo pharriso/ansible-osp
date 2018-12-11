@@ -6,6 +6,11 @@
   tasks:
   - name: Create Project
     os_project:
+      auth:
+        auth_url: "{{ osp_auth_url }}"
+        username: "{{ osp_username }}"
+        password: "{{ osp_password }}"
+        project_name: "{{ osp_project_name }}"
       state: present
       name: "{{ osp_project }}"
 
