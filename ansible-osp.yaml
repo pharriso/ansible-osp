@@ -1,28 +1,75 @@
 ---
 
-- hosts: all
+- hosts: localhost
   connection: local
   gather_facts: false
+  vars:
+    glance_image_url: http://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img
+    glance_image_name: cirros
+    internal_network: internal
+    internal_cidr: 192.168.100.0/24
+    external_network: external
+    external_cidr: 10.50.0.0/24
   tasks:
+  - name: get glance image
+    get_url:
+      url: "{{ glance_image_url }}"
+      dest: /tmp
+    register: image_download
+
+  - name: create glance image
+    os_image:
+      name: "{{ glance_image_name }}"
+      container_format: bare
+      disk_format: qcow2
+      state: present
+      is_public: yes
+      filename: "{{ image_download.dest }}"
+
+  - name: create flavor
+    os_nova_flavor:
+      state: present
+      name: m1.tiny
+      ram: 512
+      vcpus: 1
+      disk: 10
+
   - name: Create internal network
     os_network:
-      name: "{{ internal_network }}-internal"
+      name: "{{ internal_network }}"
       state: present
 
   - name: Create internal subnet
     os_subnet: 
       state: present
-      network_name: "{{ internal_network }}-internal"
-      name: "{{ internal_network }}-internal-subnet"
+      network_name: "{{ internal_network }}"
+      name: "{{ internal_network }}-subnet"
       cidr: "{{ internal_cidr }}"
 
+  - name: create external network
+    os_network:
+      name: "{{ external_network }}"
+      external: true
+      provider_physical_network: datacentre
+      provider_network_type: flat
+
+  - name: create external network cidr
+    os_subnet:
+      network_name: "{{ external_network }}"
+      name: "{{ external_network }}-subnet"
+      cidr: "{{ external_cidr }}"
+      enable_dhcp: false
+      gateway_ip: 10.50.0.2
+      allocation_pool_start: 10.50.0.248
+      allocation_pool_end: 10.50.0.249
+      
   - name: Create router
     os_router:
-      name: "{{ internal_network }}-router"
+      name: router
       state: present
       network: "{{ external_network }}"
       interfaces:
-        - "{{ internal_network }}-internal-subnet"
+        - "{{ internal_network }}-subnet"
 
   - name: Create SSH security group
     os_security_group:
@@ -35,23 +82,24 @@
       port_range_min: 22
       port_range_max: 22
 
+  - name: create ssh keys
+    openssh_keypair:
+      path: /home/stack/.ssh/osp
+    register: keypair
+
   - name: Create key
     os_keypair:
       name: mykeypair
-      public_key: "{{ public_key }}"
+      public_key: "{{ keypair.public_key }}"
 
   - name: Launch cirros instance
     os_server:
       state: present
       name: "{{ vm_name }}"
-      image: cirros
+      image: "{{ glance_image_name }}"
       flavor: m1.tiny
       nics:
-        - net-name: "{{ internal_network }}-internal"
+        - net-name: "{{ internal_network }}"
       key_name: mykeypair
       security_groups: default,ssh
-
-  - name: Create floating ip
-    os_floating_ip:
-      server: "{{ vm_name }}"
-      network: "{{ external_network }}"
+      auto_ip: true
